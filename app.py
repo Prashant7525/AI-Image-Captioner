@@ -16,9 +16,9 @@ def main():
 
     caption_service = CaptionService()
 
-    app = create_ui(caption_service)
+    demo = create_ui(caption_service)
 
-    app.launch()
+    demo.launch()
 
 
 if __name__ == "__main__":
