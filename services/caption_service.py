@@ -1,25 +1,29 @@
+import base64
+import io
 import re
+import time
+
 from PIL import Image
-import torch
+from huggingface_hub import InferenceClient
+
+from config import HF_MODEL, HF_PROVIDER, HF_TOKEN
 
 
 class CaptionService:
-    def __init__(self, model_loader):
-        self.processor = model_loader.get_processor()
-        self.model = model_loader.get_model()
-        self.device = model_loader.get_device()
+    def __init__(self, model_loader=None):
+        if not HF_TOKEN:
+            raise RuntimeError("HF_TOKEN is not configured.")
 
-    def _generate(
-        self,
-        image,
-        prompt=None,
-        max_new_tokens=40,
-        min_new_tokens=5,
-        num_beams=5,
-        do_sample=False,
-        temperature=1.0,
-        top_p=0.9,
-    ):
+        self.model_name = HF_MODEL
+        self.provider = HF_PROVIDER or "novita"
+
+        self.client = InferenceClient(
+            provider=self.provider,
+            api_key=HF_TOKEN,
+            timeout=120,
+        )
+
+    def generate_caption(self, image, style="Short"):
         if image is None:
             raise ValueError("Please upload an image first.")
 
@@ -28,135 +32,199 @@ class CaptionService:
 
         image = image.convert("RGB")
 
-        if prompt:
-            inputs = self.processor(
-                images=image,
-                text=prompt,
-                return_tensors="pt",
-            )
-        else:
-            inputs = self.processor(
-                images=image,
-                return_tensors="pt",
-            )
-
-        inputs = {
-            key: value.to(self.device)
-            for key, value in inputs.items()
-        }
-
-        generation_kwargs = {
-            "max_new_tokens": max_new_tokens,
-            "min_new_tokens": min_new_tokens,
-            "num_beams": num_beams,
-            "do_sample": do_sample,
-            "repetition_penalty": 1.15,
-            "no_repeat_ngram_size": 3,
-            "length_penalty": 1.0,
-            "early_stopping": True,
-        }
-
-        if do_sample:
-            generation_kwargs.update(
-                {
-                    "temperature": temperature,
-                    "top_p": top_p,
-                }
-            )
-
-        with torch.inference_mode():
-            output = self.model.generate(
-                **inputs,
-                **generation_kwargs,
-            )
-
-        text = self.processor.decode(
-            output[0],
-            skip_special_tokens=True,
-        ).strip()
-
-        return self._clean(text)
-
-    def generate_caption(self, image, style="Short"):
         style = (style or "Short").strip().lower()
 
         if style == "short":
-            return self._generate(
-                image,
-                max_new_tokens=20,
-                min_new_tokens=5,
-                num_beams=6,
-                do_sample=False,
+            prompt = (
+                "Describe this image in one concise natural sentence. "
+                "Identify the main subject and what it is doing. "
+                "Only describe what is visibly present."
+            )
+            max_tokens = 50
+            temperature = 0.2
+
+        elif style == "detailed":
+            prompt = (
+                "Describe this image in detail. Mention the main "
+                "subjects, their actions, the environment, colors, "
+                "and important visible details. Do not invent facts."
+            )
+            max_tokens = 100
+            temperature = 0.2
+
+        elif style == "creative":
+            prompt = (
+                "Write a natural and engaging caption for this image. "
+                "Keep it visually accurate and concise. "
+                "Do not invent information."
+            )
+            max_tokens = 70
+            temperature = 0.7
+
+        else:
+            raise ValueError(
+                "Caption style must be Short, Detailed, or Creative."
             )
 
-        if style == "detailed":
-            caption = self._generate(
-                image,
-                prompt="a detailed photo of",
-                max_new_tokens=48,
-                min_new_tokens=10,
-                num_beams=7,
-                do_sample=False,
-            )
+        image_url = self._image_to_data_url(image)
 
-            if len(caption.split()) < 10:
-                caption = self._generate(
-                    image,
-                    max_new_tokens=45,
-                    min_new_tokens=8,
-                    num_beams=7,
-                    do_sample=False,
+        last_error = None
+
+        for attempt in range(3):
+            try:
+                response = self.client.chat_completion(
+                    model=self.model_name,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": prompt,
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": image_url,
+                                    },
+                                },
+                            ],
+                        }
+                    ],
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    extra_body={
+                        "chat_template_kwargs": {
+                            "enable_thinking": False
+                        }
+                    },
                 )
 
-            return self._refine_detailed(caption)
+                text = self._extract_text(response)
 
-        if style == "creative":
-            caption = self._generate(
-                image,
-                prompt="a natural caption for this image",
-                max_new_tokens=38,
-                min_new_tokens=7,
-                num_beams=4,
-                do_sample=True,
-                temperature=0.85,
-                top_p=0.92,
-            )
+                if text:
+                    return self._clean(text)
 
-            return self._refine_creative(caption)
+                raise RuntimeError(
+                    "The model returned an empty response."
+                )
 
-        raise ValueError(
-            "Caption style must be Short, Detailed, or Creative."
+            except Exception as exc:
+                last_error = exc
+
+                if attempt < 2:
+                    time.sleep(2 * (attempt + 1))
+
+        raise RuntimeError(
+            f"Hugging Face inference failed: {last_error}"
         )
+
+    @staticmethod
+    def _extract_text(response):
+        if response is None:
+            return ""
+
+        try:
+            choices = response.choices
+        except Exception:
+            return ""
+
+        if not choices:
+            return ""
+
+        message = choices[0].message
+
+        if message is None:
+            return ""
+
+        content = getattr(message, "content", None)
+
+        if isinstance(content, str) and content.strip():
+            return content.strip()
+
+        if isinstance(content, list):
+            parts = []
+
+            for item in content:
+                if isinstance(item, str):
+                    parts.append(item)
+
+                elif isinstance(item, dict):
+                    value = item.get("text")
+                    if value:
+                        parts.append(str(value))
+
+                else:
+                    value = getattr(item, "text", None)
+                    if value:
+                        parts.append(str(value))
+
+            result = " ".join(parts).strip()
+
+            if result:
+                return result
+
+        reasoning = getattr(
+            message,
+            "reasoning_content",
+            None,
+        )
+
+        if isinstance(reasoning, str) and reasoning.strip():
+            return reasoning.strip()
+
+        return ""
+
+    @staticmethod
+    def _image_to_data_url(image):
+        image = image.copy()
+
+        image.thumbnail(
+            (1024, 1024),
+            Image.Resampling.LANCZOS,
+        )
+
+        buffer = io.BytesIO()
+
+        image.save(
+            buffer,
+            format="JPEG",
+            quality=85,
+            optimize=True,
+        )
+
+        encoded = base64.b64encode(
+            buffer.getvalue()
+        ).decode("utf-8")
+
+        return f"data:image/jpeg;base64,{encoded}"
 
     @staticmethod
     def _clean(text):
         if not text:
             return ""
 
+        text = str(text).strip()
+
         text = re.sub(
-            r"^(a|an|the)\s+"
-            r"(detailed|creative|natural)\s+"
-            r"(description|caption)\s*(of|for)?\s*",
+            r"<think>.*?</think>",
+            "",
+            text,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+
+        text = re.sub(
+            r"^(assistant|caption)\s*:\s*",
             "",
             text,
             flags=re.IGNORECASE,
         )
 
         text = re.sub(
-            r"^(this image|the image)\s+(shows|depicts)\s+",
-            "",
+            r"\s+",
+            " ",
             text,
-            flags=re.IGNORECASE,
-        )
-
-        text = re.sub(
-            r"\b(a|an|the)\s+(photo|picture|image)\s+of\s+",
-            "",
-            text,
-            flags=re.IGNORECASE,
-        )
-
-        text = re.sub(r"\s+", " ", text).strip()
+        ).strip()
 
         text = re.sub(
             r"([.!?])\s*\1+",
@@ -167,43 +235,4 @@ class CaptionService:
         if text and text[-1] not in ".!?":
             text += "."
 
-        return text[:1].upper() + text[1:] if text else text
-
-    @staticmethod
-    def _refine_detailed(caption):
-        if not caption:
-            return caption
-
-        caption = caption.strip()
-
-        if caption[-1] not in ".!?":
-            caption += "."
-
-        return caption
-
-    @staticmethod
-    def _refine_creative(caption):
-        if not caption:
-            return caption
-
-        caption = caption.strip()
-
-        caption = re.sub(
-            r"^(a|an|the)\s+",
-            "",
-            caption,
-            count=1,
-            flags=re.IGNORECASE,
-        )
-
-        caption = re.sub(
-            r"\bvery\s+very\b",
-            "very",
-            caption,
-            flags=re.IGNORECASE,
-        )
-
-        if caption and caption[-1] not in ".!?":
-            caption += "."
-
-        return caption[:1].upper() + caption[1:]
+        return text[:1].upper() + text[1:]

@@ -1,6 +1,5 @@
-torch>=2.2,<3.0
-torchvision>=0.17,<1.0
-transformers>=4.45,<5.0
-Pillow>=10.0,<13.0
 gradio>=5.0,<6.0
-pytest>=8.0,<9.0
+huggingface-hub>=0.34,<1.0
+Pillow>=10.0,<13.0
+python-dotenv>=1.0,<2.0
+requests>=2.31,<3.0

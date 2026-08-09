@@ -1,21 +1,54 @@
 from pathlib import Path
+
 from PIL import Image
+
 from config import MAX_IMAGE_SIZE_MB, SUPPORTED_FORMATS
+
+
+def format_image_info(image):
+    if image is None:
+        return "Upload an image to begin."
+
+    try:
+        image_format = image.format or "Unknown"
+        width, height = image.size
+        mode = image.mode
+
+        return (
+            f"**{width} × {height} px** · "
+            f"**{mode}** · "
+            f"**{image_format}**"
+        )
+    except Exception:
+        return "Image information unavailable."
+
 
 def validate_image(image):
     if image is None:
         raise ValueError("Please upload an image first.")
-    if not isinstance(image, Image.Image):
-        raise ValueError("The uploaded file could not be read as an image.")
-    if image.format and image.format.lower() not in SUPPORTED_FORMATS:
-        raise ValueError("Unsupported image format. Use JPG, JPEG, PNG, or WEBP.")
-    width, height = image.size
-    if width <= 0 or height <= 0:
-        raise ValueError("The image has invalid dimensions.")
-    if width * height > 40_000_000:
-        raise ValueError("Image is too large. Please use an image below 40 megapixels.")
 
-def format_image_info(image):
-    if image is None:
-        return ""
-    return f"{image.width:,} × {image.height:,} px · {image.mode}"
+    if not isinstance(image, Image.Image):
+        raise ValueError("Invalid image.")
+
+    if image.format:
+        image_format = image.format.upper()
+
+        if image_format not in SUPPORTED_FORMATS:
+            raise ValueError(
+                f"Unsupported image format: {image_format}"
+            )
+
+    return True
+
+
+def save_caption(text):
+    output_dir = Path("outputs")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_file = output_dir / "caption.txt"
+    output_file.write_text(
+        text or "",
+        encoding="utf-8",
+    )
+
+    return str(output_file)
