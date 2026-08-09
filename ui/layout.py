@@ -14,14 +14,14 @@ body {
     background: #eef4ff !important;
 }
 
-/* Main container */
-
 .gradio-container {
     max-width: 1200px !important;
     margin: auto !important;
 }
 
-/* Header */
+/* ---------------------------------------------
+   Header
+--------------------------------------------- */
 
 .main-title {
     text-align: center;
@@ -39,7 +39,9 @@ body {
     margin-bottom: 25px;
 }
 
-/* Cards */
+/* ---------------------------------------------
+   Cards
+--------------------------------------------- */
 
 .card {
     background: white;
@@ -48,14 +50,18 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* Caption */
+/* ---------------------------------------------
+   Caption output
+--------------------------------------------- */
 
 .caption-output textarea {
     font-size: 18px !important;
     line-height: 1.7 !important;
 }
 
-/* Buttons */
+/* ---------------------------------------------
+   Buttons
+--------------------------------------------- */
 
 button {
     border-radius: 12px !important;
@@ -63,28 +69,32 @@ button {
     font-weight: 700 !important;
 }
 
-/* Generate button */
-
 .generate-button {
     margin-top: 12px;
 }
 
-/* Footer */
+/* ---------------------------------------------
+   Style selector
+--------------------------------------------- */
+
+.style-label {
+    font-weight: 700;
+}
+
+/* ---------------------------------------------
+   Footer
+--------------------------------------------- */
 
 .footer {
     text-align: center;
     color: #64748b;
-    padding: 20px;
+    padding: 25px;
     font-size: 14px;
 }
-
-/* Images */
 
 img {
     border-radius: 15px;
 }
-
-/* Hide default Gradio footer */
 
 footer {
     visibility: hidden;
@@ -102,9 +112,9 @@ def create_ui(caption_service):
         title="AI Image Captioner",
     ) as demo:
 
-        # --------------------------------------------------
-        # Header
-        # --------------------------------------------------
+        # ==================================================
+        # HEADER
+        # ==================================================
 
         gr.HTML(
             """
@@ -119,15 +129,15 @@ def create_ui(caption_service):
             """
         )
 
-        # --------------------------------------------------
-        # Main application
-        # --------------------------------------------------
+        # ==================================================
+        # MAIN CONTENT
+        # ==================================================
 
         with gr.Row():
 
-            # ----------------------------------------------
-            # Left side
-            # ----------------------------------------------
+            # ------------------------------------------------
+            # LEFT COLUMN
+            # ------------------------------------------------
 
             with gr.Column(scale=1):
 
@@ -138,15 +148,33 @@ def create_ui(caption_service):
                         type="filepath",
                     )
 
-                    generate_button = gr.Button(
-                        "🚀 Generate Caption",
-                        variant="primary",
-                        elem_classes="generate-button",
+                    style_dropdown = gr.Dropdown(
+                        choices=[
+                            "Short",
+                            "Detailed",
+                            "Creative",
+                        ],
+                        value="Short",
+                        label="🎨 Caption Style",
+                        elem_classes="style-label",
                     )
 
-            # ----------------------------------------------
-            # Right side
-            # ----------------------------------------------
+                    with gr.Row():
+
+                        generate_button = gr.Button(
+                            "🚀 Generate Caption",
+                            variant="primary",
+                            elem_classes="generate-button",
+                        )
+
+                        clear_button = gr.Button(
+                            "🗑️ Clear",
+                            variant="secondary",
+                        )
+
+            # ------------------------------------------------
+            # RIGHT COLUMN
+            # ------------------------------------------------
 
             with gr.Column(scale=1):
 
@@ -158,13 +186,13 @@ def create_ui(caption_service):
                             "Your generated caption "
                             "will appear here..."
                         ),
-                        lines=6,
+                        lines=7,
                         elem_classes="caption-output",
                     )
 
-        # --------------------------------------------------
-        # Footer
-        # --------------------------------------------------
+        # ==================================================
+        # FOOTER
+        # ==================================================
 
         gr.HTML(
             """
@@ -178,14 +206,30 @@ def create_ui(caption_service):
             """
         )
 
-        # --------------------------------------------------
-        # Event
-        # --------------------------------------------------
+        # ==================================================
+        # GENERATE EVENT
+        # ==================================================
 
         generate_button.click(
             fn=caption_service.generate_caption,
-            inputs=image_input,
+            inputs=[
+                image_input,
+                style_dropdown,
+            ],
             outputs=caption_output,
+        )
+
+        # ==================================================
+        # CLEAR EVENT
+        # ==================================================
+
+        clear_button.click(
+            fn=lambda: (None, ""),
+            inputs=None,
+            outputs=[
+                image_input,
+                caption_output,
+            ],
         )
 
     return demo
