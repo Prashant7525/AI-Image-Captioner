@@ -1,235 +1,225 @@
-"""
-ui/layout.py
-
-Professional Gradio interface for the AI Image Captioner.
-"""
-
+import os
 import gradio as gr
 
-from ui.theme import create_theme
+from ui.events import generate_caption
+from utils import format_image_info
 
 
-CSS = """
-body {
-    background: #eef4ff !important;
-}
-
-.gradio-container {
-    max-width: 1200px !important;
-    margin: auto !important;
-}
-
-/* ---------------------------------------------
-   Header
---------------------------------------------- */
-
-.main-title {
-    text-align: center;
-    font-size: 42px;
-    font-weight: 800;
-    color: #1f2937;
-    margin-top: 10px;
-    margin-bottom: 6px;
-}
-
-.sub-title {
-    text-align: center;
-    font-size: 17px;
-    color: #64748b;
-    margin-bottom: 25px;
-}
-
-/* ---------------------------------------------
-   Cards
---------------------------------------------- */
-
-.card {
-    background: white;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-}
-
-/* ---------------------------------------------
-   Caption output
---------------------------------------------- */
-
-.caption-output textarea {
-    font-size: 18px !important;
-    line-height: 1.7 !important;
-}
-
-/* ---------------------------------------------
-   Buttons
---------------------------------------------- */
-
-button {
-    border-radius: 12px !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-}
-
-.generate-button {
-    margin-top: 12px;
-}
-
-/* ---------------------------------------------
-   Style selector
---------------------------------------------- */
-
-.style-label {
-    font-weight: 700;
-}
-
-/* ---------------------------------------------
-   Footer
---------------------------------------------- */
-
-.footer {
-    text-align: center;
-    color: #64748b;
-    padding: 25px;
-    font-size: 14px;
-}
-
-img {
-    border-radius: 15px;
-}
-
-footer {
-    visibility: hidden;
-}
-"""
-
-
-def create_ui(caption_service):
-
-    theme = create_theme()
+def create_ui(caption_service, device):
+    css = ""
+    if os.path.exists("styles/custom.css"):
+        with open("styles/custom.css", encoding="utf-8") as file:
+            css = file.read()
 
     with gr.Blocks(
-        theme=theme,
-        css=CSS,
         title="AI Image Captioner",
+        css=css,
+        theme=gr.themes.Soft(),
     ) as demo:
+        gr.HTML(
+            """
+            <header class="hero">
+                <h1>🤖 AI Image Captioner</h1>
+                <p>Transform images into natural-language descriptions using <strong>Salesforce BLIP</strong></p>
+                <span class="status-badge">● Model Ready</span>
+            </header>
+            """
+        )
 
-        # ==================================================
-        # HEADER
-        # ==================================================
+        with gr.Row(elem_classes="main-row"):
+            with gr.Column(scale=1, elem_classes="card"):
+                gr.Markdown("### 🖼️ Image Input")
+
+                image = gr.Image(
+                    type="pil",
+                    sources=["upload", "clipboard"],
+                    label="Upload Image",
+                    elem_id="image_input",
+                )
+
+                image_info = gr.Markdown(
+                    "Upload an image to begin.",
+                    elem_id="image_info",
+                )
+
+                style = gr.Dropdown(
+                    choices=["Short", "Detailed", "Creative"],
+                    value="Short",
+                    label="🎨 Caption Style",
+                    elem_id="style_select",
+                )
+
+                with gr.Row():
+                    generate = gr.Button(
+                        "🚀 Generate Caption",
+                        variant="primary",
+                        elem_id="generate_btn",
+                    )
+                    clear = gr.Button(
+                        "🗑 Clear",
+                        elem_id="clear_btn",
+                    )
+
+                regenerate = gr.Button(
+                    "↻ Generate Again",
+                    visible=False,
+                    elem_id="regenerate_btn",
+                )
+
+            with gr.Column(scale=1, elem_classes="card"):
+                gr.Markdown("### ✨ Generated Caption")
+
+                caption = gr.Textbox(
+                    value="",
+                    lines=8,
+                    show_label=False,
+                    placeholder="Your generated caption will appear here...",
+                    elem_id="caption_output",
+                )
+
+                with gr.Row():
+                    copy = gr.Button("📋 Copy", elem_id="copy_btn")
+                    download = gr.DownloadButton(
+                        "⬇ Download",
+                        visible=False,
+                        elem_id="download_btn",
+                    )
+
+                status = gr.Markdown("", elem_id="status")
+
+        with gr.Row(elem_classes="info-row"):
+            with gr.Column(elem_classes="info-card"):
+                gr.Markdown(
+                    """
+                    ### ⚡ How It Works
+                    **1. Upload** → **2. Choose style** → **3. BLIP analyzes** → **4. Generate caption**
+
+                    **Short** produces a concise description. **Detailed** aims for richer context. **Creative** uses sampling for more varied wording.
+                    """
+                )
+
+            with gr.Column(elem_classes="info-card"):
+                gr.Markdown(
+                    f"""
+                    ### ⚙️ Model Information
+                    **Model:** `Salesforce/blip-image-captioning-base`  
+                    **Device:** `{device}`  
+                    **Framework:** `PyTorch · Transformers · Gradio`
+                    """
+                )
 
         gr.HTML(
             """
-            <div class="main-title">
-                🤖 AI Image Captioner
-            </div>
-
-            <div class="sub-title">
-                Generate natural language captions using
-                <strong>Salesforce BLIP</strong>
-            </div>
+            <footer class="app-footer">
+                <div>© 2026 Prashant Kumar · AI Image Captioner · Powered by Salesforce BLIP</div>
+            </footer>
             """
         )
 
-        # ==================================================
-        # MAIN CONTENT
-        # ==================================================
-
-        with gr.Row():
-
-            # ------------------------------------------------
-            # LEFT COLUMN
-            # ------------------------------------------------
-
-            with gr.Column(scale=1):
-
-                with gr.Group(elem_classes="card"):
-
-                    image_input = gr.Image(
-                        label="🖼️ Upload Image",
-                        type="filepath",
-                    )
-
-                    style_dropdown = gr.Dropdown(
-                        choices=[
-                            "Short",
-                            "Detailed",
-                            "Creative",
-                        ],
-                        value="Short",
-                        label="🎨 Caption Style",
-                        elem_classes="style-label",
-                    )
-
-                    with gr.Row():
-
-                        generate_button = gr.Button(
-                            "🚀 Generate Caption",
-                            variant="primary",
-                            elem_classes="generate-button",
-                        )
-
-                        clear_button = gr.Button(
-                            "🗑️ Clear",
-                            variant="secondary",
-                        )
-
-            # ------------------------------------------------
-            # RIGHT COLUMN
-            # ------------------------------------------------
-
-            with gr.Column(scale=1):
-
-                with gr.Group(elem_classes="card"):
-
-                    caption_output = gr.Textbox(
-                        label="✨ Generated Caption",
-                        placeholder=(
-                            "Your generated caption "
-                            "will appear here..."
-                        ),
-                        lines=7,
-                        elem_classes="caption-output",
-                    )
-
-        # ==================================================
-        # FOOTER
-        # ==================================================
-
-        gr.HTML(
-            """
-            <div class="footer">
-                Made with ❤️ using
-                <strong>Python</strong> ·
-                <strong>Gradio</strong> ·
-                <strong>Hugging Face</strong> ·
-                <strong>Salesforce BLIP</strong>
-            </div>
-            """
+        image.change(
+            lambda img: format_image_info(img) if img else "Upload an image to begin.",
+            inputs=image,
+            outputs=image_info,
         )
 
-        # ==================================================
-        # GENERATE EVENT
-        # ==================================================
+        def run(image_value, style_value):
+            try:
+                text, message, download_path = generate_caption(
+                    image_value,
+                    style_value,
+                    caption_service,
+                )
+                return (
+                    text,
+                    message,
+                    gr.Button(
+                        value="↻ Generate Again",
+                        visible=True,
+                        interactive=True,
+                    ),
+                    gr.Button(
+                        value="🚀 Generate Caption",
+                        visible=True,
+                        interactive=True,
+                    ),
+                    gr.DownloadButton(
+                        value=download_path,
+                        visible=True,
+                    ),
+                )
+            except Exception as exc:
+                return (
+                    "",
+                    f"⚠️ {exc}",
+                    gr.Button(visible=False),
+                    gr.Button(
+                        value="🚀 Generate Caption",
+                        visible=True,
+                        interactive=True,
+                    ),
+                    gr.DownloadButton(visible=False),
+                )
 
-        generate_button.click(
-            fn=caption_service.generate_caption,
-            inputs=[
-                image_input,
-                style_dropdown,
-            ],
-            outputs=caption_output,
+        def loading_state():
+            return (
+                gr.Button(
+                    value="⏳ Generating...",
+                    interactive=False,
+                    visible=True,
+                ),
+                gr.Button(
+                    value="⏳ Generating...",
+                    interactive=False,
+                    visible=True,
+                ),
+            )
+
+        generate.click(
+            loading_state,
+            outputs=[generate, regenerate],
+        ).then(
+            run,
+            inputs=[image, style],
+            outputs=[caption, status, regenerate, generate, download],
         )
 
-        # ==================================================
-        # CLEAR EVENT
-        # ==================================================
+        regenerate.click(
+            loading_state,
+            outputs=[generate, regenerate],
+        ).then(
+            run,
+            inputs=[image, style],
+            outputs=[caption, status, regenerate, generate, download],
+        )
 
-        clear_button.click(
-            fn=lambda: (None, ""),
-            inputs=None,
-            outputs=[
-                image_input,
-                caption_output,
-            ],
+        clear.click(
+            lambda: (
+                None,
+                "Upload an image to begin.",
+                "",
+                "",
+                gr.Button(visible=False),
+                gr.DownloadButton(visible=False),
+                gr.Button(value="🚀 Generate Caption", interactive=True),
+            ),
+            outputs=[image, image_info, caption, status, regenerate, download, generate],
+        )
+
+        copy.click(
+            None,
+            js="""
+            () => {
+                const box = document.querySelector('#caption_output textarea');
+                const button = document.querySelector('#copy_btn button');
+                if (!box || !box.value.trim()) return;
+                navigator.clipboard.writeText(box.value);
+                if (button) {
+                    const oldText = button.innerText;
+                    button.innerText = '✓ Copied';
+                    setTimeout(() => button.innerText = oldText, 1400);
+                }
+            }
+            """,
         )
 
     return demo

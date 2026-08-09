@@ -1,25 +1,16 @@
-"""
-app.py
-
-Entry point for the AI Image Captioner.
-"""
-
+from core.model_loader import ModelLoader
 from services.caption_service import CaptionService
 from ui.layout import create_ui
+from logger import get_logger
 
+logger = get_logger(__name__)
 
 def main():
-
-    print("=" * 60)
-    print("AI IMAGE CAPTIONER")
-    print("=" * 60)
-
-    caption_service = CaptionService()
-
-    demo = create_ui(caption_service)
-
+    logger.info("Starting AI Image Captioner")
+    loader = ModelLoader()
+    service = CaptionService(loader)
+    demo = create_ui(service, loader.get_device())
     demo.launch()
-
 
 if __name__ == "__main__":
     main()

@@ -1,40 +1,14 @@
-body{
-    background:#eef4ff;
-}
-
-.main-title{
-    text-align:center;
-    font-size:42px;
-    font-weight:bold;
-}
-
-.sub-title{
-    text-align:center;
-    color:#666;
-}
-
-button{
-    border-radius:12px !important;
-    font-size:18px !important;
-    font-weight:bold !important;
-}
-
-textarea{
-    font-size:18px !important;
-}
-
-img{
-    border-radius:14px;
-}
-
-.gr-button{
-    border-radius:12px !important;
-}
-
-.gr-file{
-    border-radius:12px !important;
-}
-
-footer{
-    visibility:hidden;
-}
+body { background: #f5f8ff !important; }
+.hero { text-align:center; padding: 28px 20px 18px; }
+.hero h1 { font-size: 42px; margin: 0 0 8px; color:#172033; }
+.hero p { font-size:18px; color:#5b6b86; margin:0 0 14px; }
+.status-badge { display:inline-block; padding:6px 12px; border-radius:999px; background:#e9f8ef; color:#18794e; font-size:13px; font-weight:700; }
+.main-row { max-width: 1050px; margin: 0 auto; gap: 22px; }
+.card { background:rgba(255,255,255,.96); border:1px solid #e5eaf2; border-radius:22px; padding:24px; box-shadow:0 14px 40px rgba(34,55,90,.08); }
+#image_input { min-height: 360px; }
+#caption_output textarea { font-size:18px !important; line-height:1.65 !important; }
+#generate_btn, #regenerate_btn { min-height:52px; font-weight:700; }
+#clear_btn, #copy_btn, #download_btn { min-height:48px; font-weight:600; }
+#status { min-height:28px; }
+.app-footer { text-align:center; margin:34px auto 10px; padding:20px 10px; color:#64748b; font-size:14px; font-weight:500; }
+@media (max-width: 800px) { .hero h1 {font-size:32px;} .hero p {font-size:16px;} .main-row {margin:0 10px;} .card {padding:18px;} }

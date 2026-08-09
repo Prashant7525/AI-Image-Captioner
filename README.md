@@ -1,41 +1,119 @@
+---
+title: AI Image Captioner
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+app_file: app.py
+python_version: 3.12
+pinned: false
+---
+
 # 🤖 AI Image Captioner
 
-A basic AI-powered image captioning application using **Salesforce BLIP**, Hugging Face Transformers, PyTorch, and Gradio.
-
-## 📌 Version
-
-**v0.1.0 — Basic Image Captioner**
+A professional image captioning application powered by **Salesforce BLIP**.
 
 ## ✨ Features
 
-- Upload an image
-- Process the image using Salesforce BLIP
-- Generate a natural language caption
-- Display the generated caption
+- Short, Detailed, and Creative caption styles
+- Image upload and clipboard support
+- Image preview and dimensions
+- Copy generated captions to clipboard
+- Download captions as `.txt`
+- Generate Again for alternate wording
+- CPU/GPU support
+- Friendly validation and error messages
+- Logging and automated tests
+- Responsive professional UI
 
-## 🧠 Model
+## 🧠 How It Works
 
-This project uses:
+```text
+Upload Image
+     ↓
+Choose Caption Style
+     ↓
+Image Preprocessing
+     ↓
+Salesforce BLIP
+     ↓
+Caption Generation
+     ↓
+Copy / Download / Regenerate
+```
 
-**Salesforce BLIP Image Captioning Base**
+### Caption styles
 
-Model:
+- **Short** — concise image description.
+- **Detailed** — longer description with richer wording.
+- **Creative** — sampling-based generation for more varied wording.
 
-`Salesforce/blip-image-captioning-base`
-
-## 🛠️ Technologies
+## 🛠 Tech Stack
 
 - Python
 - PyTorch
 - Hugging Face Transformers
 - Salesforce BLIP
-- Pillow
 - Gradio
+- Pillow
+- Pytest
 
-## 🚀 How to Run
+## 📁 Project Structure
 
-### 1. Clone the repository
+```text
+AI-Image-Captioner/
+├── app.py
+├── config.py
+├── logger.py
+├── utils.py
+├── requirements.txt
+├── LICENSE
+├── core/
+│   └── model_loader.py
+├── services/
+│   └── caption_service.py
+├── ui/
+│   ├── layout.py
+│   └── events.py
+├── styles/
+│   └── custom.css
+├── tests/
+│   ├── test_caption_service.py
+│   └── test_model_loader.py
+├── images/
+└── outputs/
+```
+
+## 🚀 Run Locally
 
 ```bash
-git clone https://github.com/Prashant7525/AI-Image-Captioner.git
-cd AI-Image-Captioner
+python -m venv venv
+```
+
+Windows PowerShell:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python app.py
+```
+
+Then open the Gradio URL shown in the terminal.
+
+## 🧪 Run Tests
+
+```powershell
+pytest -q
+```
+
+## ☁️ Deployment
+
+The application is ready for deployment to a Gradio-compatible hosting platform such as Hugging Face Spaces.
+
+## 👨‍💻 Author
+
+**Prashant Kumar**
+
+## 📄 License
+
+MIT License — see `LICENSE`.

@@ -1,45 +1,15 @@
-# Python
 __pycache__/
 *.py[cod]
-*.pyo
-
-# Virtual environments
-venv/
 .venv/
+venv/
 env/
-
-# Environment variables
-.env
-.env.*
-
-# IDE
+.cache/
+.cache*/
+huggingface/
+outputs/*
+logs/*
+images/*
+*.log
+.pytest_cache/
 .vscode/
 .idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Python testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Model files / caches
-*.bin
-*.pt
-*.pth
-*.ckpt
-*.safetensors
-
-# Hugging Face cache
-.cache/
-huggingface/
-# Generated runtime files
-outputs/*
-
-# User uploaded images
-images/*

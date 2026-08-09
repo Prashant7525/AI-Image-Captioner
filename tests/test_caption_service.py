@@ -1,28 +1,16 @@
-"""
-tests/test_caption_service.py
-"""
-
+import pytest
 from services.caption_service import CaptionService
 
+class DummyService(CaptionService):
+    def __init__(self): pass
+    def _generate(self, *args, **kwargs): return "a cat sitting on grass"
 
-def main():
+def test_styles_are_supported():
+    service = DummyService()
+    assert "cat" in service.generate_caption(None, "Short").lower()
+    assert "cat" in service.generate_caption(None, "Detailed").lower()
+    assert "cat" in service.generate_caption(None, "Creative").lower()
 
-    service = CaptionService()
-
-    image_path = "images/sample.jpg"
-
-    caption = service.generate_caption(image_path)
-
-    print("\n")
-
-    print("=" * 60)
-    print("GENERATED CAPTION")
-    print("=" * 60)
-
-    print(caption)
-
-    print("=" * 60)
-
-
-if __name__ == "__main__":
-    main()
+def test_invalid_style():
+    service = DummyService()
+    with pytest.raises(ValueError): service.generate_caption(None, "Unknown")

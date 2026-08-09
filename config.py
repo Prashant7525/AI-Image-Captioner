@@ -1,13 +1,4 @@
-"""
-config.py
-
-Configuration for the basic AI Image Captioner.
-"""
-
 MODEL_NAME = "Salesforce/blip-image-captioning-base"
-
-MAX_LENGTH = 50
-MIN_LENGTH = 5
-NUM_BEAMS = 5
-
-DEVICE = "cuda"
+APP_TITLE = "AI Image Captioner"
+MAX_IMAGE_SIZE_MB = 10
+SUPPORTED_FORMATS = {"jpg", "jpeg", "png", "webp"}

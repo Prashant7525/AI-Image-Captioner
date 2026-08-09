@@ -1,85 +1,21 @@
-"""
-utils.py
-"""
-
-import csv
-import json
-import os
-import time
+from pathlib import Path
 from PIL import Image
+from config import MAX_IMAGE_SIZE_MB, SUPPORTED_FORMATS
 
-caption_history = []
-
-
-def save_caption(caption):
-    caption_history.append(caption)
-
-
-def get_history():
-    return caption_history
-
-
-def clear_history():
-    caption_history.clear()
-
-
-def export_caption(caption):
-
-    os.makedirs("outputs", exist_ok=True)
-
-    filepath = "outputs/caption.txt"
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(caption)
-
-    return filepath
-
-
-def export_json():
-
-    os.makedirs("outputs", exist_ok=True)
-
-    filepath = "outputs/history.json"
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(caption_history, f, indent=4)
-
-    return filepath
-
-
-def export_csv():
-
-    os.makedirs("outputs", exist_ok=True)
-
-    filepath = "outputs/history.csv"
-
-    with open(filepath, "w", newline="", encoding="utf-8") as f:
-
-        writer = csv.writer(f)
-
-        writer.writerow(["Caption"])
-
-        for caption in caption_history:
-            writer.writerow([caption])
-
-    return filepath
-
-
-def get_image_info(image_path):
-
-    image = Image.open(image_path)
-
+def validate_image(image):
+    if image is None:
+        raise ValueError("Please upload an image first.")
+    if not isinstance(image, Image.Image):
+        raise ValueError("The uploaded file could not be read as an image.")
+    if image.format and image.format.lower() not in SUPPORTED_FORMATS:
+        raise ValueError("Unsupported image format. Use JPG, JPEG, PNG, or WEBP.")
     width, height = image.size
+    if width <= 0 or height <= 0:
+        raise ValueError("The image has invalid dimensions.")
+    if width * height > 40_000_000:
+        raise ValueError("Image is too large. Please use an image below 40 megapixels.")
 
-    return {
-        "Resolution": f"{width} x {height}",
-        "File Size": f"{round(os.path.getsize(image_path)/1024,2)} KB"
-    }
-
-
-def start_timer():
-    return time.time()
-
-
-def stop_timer(start):
-    return round(time.time()-start,2)
+def format_image_info(image):
+    if image is None:
+        return ""
+    return f"{image.width:,} × {image.height:,} px · {image.mode}"

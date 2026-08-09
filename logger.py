@@ -1,27 +1,14 @@
-"""
-Logger Configuration
-"""
-
 import logging
-import os
+from pathlib import Path
 
-os.makedirs("logs", exist_ok=True)
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
 
-logger = logging.getLogger("CaptionLogger")
-
-logger.setLevel(logging.INFO)
-
-formatter = logging.Formatter(
-    "%(asctime)s | %(levelname)s | %(message)s"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[logging.FileHandler(LOG_DIR / "app.log", encoding="utf-8"), logging.StreamHandler()],
 )
 
-file_handler = logging.FileHandler("logs/app.log")
-
-file_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-logger.addHandler(stream_handler)
+def get_logger(name):
+    return logging.getLogger(name)
