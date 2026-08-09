@@ -2,6 +2,7 @@ body {
     background: linear-gradient(135deg, #f7f9fc 0%, #eef3fb 100%) !important;
 }
 
+/* Hero */
 .hero {
     text-align: center;
     padding: 28px 20px 18px;
@@ -29,12 +30,14 @@ body {
     font-weight: 700;
 }
 
+/* Main workspace */
 .main-row {
     max-width: 1050px;
     margin: 0 auto;
     gap: 22px;
 }
 
+/* Cards */
 .card {
     background: rgba(255, 255, 255, 0.96);
     border: 1px solid #e5eaf2;
@@ -43,21 +46,43 @@ body {
     box-shadow: 0 14px 40px rgba(34, 55, 90, 0.08);
 }
 
+/* Image upload */
 #image_input {
     min-height: 360px;
+    border-radius: 16px;
 }
 
+#image_input:hover {
+    border-color: #6366f1 !important;
+}
+
+/* Caption output */
 #caption_output textarea {
     font-size: 18px !important;
     line-height: 1.65 !important;
+    color: #172033 !important;
 }
 
+#caption_output textarea::placeholder {
+    color: #64748b !important;
+    opacity: 0.85 !important;
+}
+
+/* Primary buttons */
 #generate_btn,
 #regenerate_btn {
     min-height: 52px;
     font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+#generate_btn:hover,
+#regenerate_btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.18);
+}
+
+/* Secondary buttons */
 #clear_btn,
 #copy_btn,
 #download_btn {
@@ -65,19 +90,53 @@ body {
     font-weight: 600;
 }
 
+/* Status message */
 #status {
     min-height: 28px;
 }
 
-.app-footer {
+/* Information section */
+.info-row {
+    max-width: 1050px;
+    margin: 28px auto 0;
     text-align: center;
-    margin: 34px auto 10px;
-    padding: 20px 10px;
+}
+
+.info-row > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.info-row h3 {
+    text-align: center;
+}
+
+.info-row p {
+    text-align: center;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Application footer */
+.app-footer {
+    display: block !important;
+    text-align: center;
+    margin: 36px auto 16px;
+    padding: 18px 10px;
     color: #64748b;
     font-size: 14px;
     font-weight: 500;
+    border-top: 1px solid #e5eaf2;
 }
 
+/* Hide only Gradio's default footer */
+.gradio-container footer:not(.app-footer) {
+    display: none !important;
+}
+
+/* Mobile responsiveness */
 @media (max-width: 800px) {
     .hero h1 {
         font-size: 32px;
@@ -87,11 +146,25 @@ body {
         font-size: 16px;
     }
 
-    .main-row {
-        margin: 0 10px;
+    .main-row,
+    .info-row {
+        margin-left: 10px;
+        margin-right: 10px;
     }
 
     .card {
         padding: 18px;
+    }
+
+    .info-row > div {
+        width: 100%;
+    }
+
+    #generate_btn,
+    #clear_btn,
+    #regenerate_btn,
+    #copy_btn,
+    #download_btn {
+        width: 100%;
     }
 }
