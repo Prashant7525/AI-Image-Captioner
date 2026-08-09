@@ -38,3 +38,8 @@ htmlcov/
 # Hugging Face cache
 .cache/
 huggingface/
+# Generated runtime files
+outputs/*
+
+# User uploaded images
+images/*

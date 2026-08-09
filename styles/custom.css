@@ -1,0 +1,40 @@
+body{
+    background:#eef4ff;
+}
+
+.main-title{
+    text-align:center;
+    font-size:42px;
+    font-weight:bold;
+}
+
+.sub-title{
+    text-align:center;
+    color:#666;
+}
+
+button{
+    border-radius:12px !important;
+    font-size:18px !important;
+    font-weight:bold !important;
+}
+
+textarea{
+    font-size:18px !important;
+}
+
+img{
+    border-radius:14px;
+}
+
+.gr-button{
+    border-radius:12px !important;
+}
+
+.gr-file{
+    border-radius:12px !important;
+}
+
+footer{
+    visibility:hidden;
+}
