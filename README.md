@@ -1,119 +1,57 @@
----
-title: AI Image Captioner
-emoji: 🤖
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-app_file: app.py
-python_version: 3.12
-pinned: false
----
-
 # 🤖 AI Image Captioner
 
-A professional image captioning application powered by **Salesforce BLIP**.
+An AI-powered image captioning web application that analyzes uploaded images and generates natural-language descriptions using Hugging Face Vision AI.
+
+🌐 **Live Demo:** https://ai-image-captioner-3p7k.onrender.com
+
+---
 
 ## ✨ Features
 
-- Short, Detailed, and Creative caption styles
-- Image upload and clipboard support
-- Image preview and dimensions
-- Copy generated captions to clipboard
-- Download captions as `.txt`
-- Generate Again for alternate wording
-- CPU/GPU support
-- Friendly validation and error messages
-- Logging and automated tests
-- Responsive professional UI
+- 🖼️ Upload images directly from the browser
+- 🤖 AI-powered image understanding
+- ✍️ Multiple caption styles:
+  - Short
+  - Detailed
+  - Creative
+- 🔄 Generate captions again
+- 📋 Copy generated captions
+- 📥 Download generated captions
+- 🧹 Clear uploaded images and results
+- 📱 Responsive web interface
+- 🔐 Environment-based API authentication
+- ☁️ Deployed on Render
+- 🚀 Uses Hugging Face Inference API
 
-## 🧠 How It Works
+---
 
-```text
-Upload Image
-     ↓
-Choose Caption Style
-     ↓
-Image Preprocessing
-     ↓
-Salesforce BLIP
-     ↓
-Caption Generation
-     ↓
-Copy / Download / Regenerate
-```
+## 🧠 AI Model
 
-### Caption styles
+The application currently uses:
 
-- **Short** — concise image description.
-- **Detailed** — longer description with richer wording.
-- **Creative** — sampling-based generation for more varied wording.
+**Model:** `zai-org/GLM-4.5V`
 
-## 🛠 Tech Stack
+**Provider:** `novita`
 
-- Python
-- PyTorch
-- Hugging Face Transformers
-- Salesforce BLIP
-- Gradio
-- Pillow
-- Pytest
+The model receives the uploaded image together with a style-specific instruction and generates a natural-language description.
 
-## 📁 Project Structure
+---
+
+## ⚙️ How It Works
 
 ```text
-AI-Image-Captioner/
-├── app.py
-├── config.py
-├── logger.py
-├── utils.py
-├── requirements.txt
-├── LICENSE
-├── core/
-│   └── model_loader.py
-├── services/
-│   └── caption_service.py
-├── ui/
-│   ├── layout.py
-│   └── events.py
-├── styles/
-│   └── custom.css
-├── tests/
-│   ├── test_caption_service.py
-│   └── test_model_loader.py
-├── images/
-└── outputs/
-```
-
-## 🚀 Run Locally
-
-```bash
-python -m venv venv
-```
-
-Windows PowerShell:
-
-```powershell
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python app.py
-```
-
-Then open the Gradio URL shown in the terminal.
-
-## 🧪 Run Tests
-
-```powershell
-pytest -q
-```
-
-## ☁️ Deployment
-
-The application is ready for deployment to a Gradio-compatible hosting platform such as Hugging Face Spaces.
-
-## 👨‍💻 Author
-
-**Prashant Kumar**
-
-## 📄 License
-
-MIT License — see `LICENSE`.
+User uploads an image
+        ↓
+Image validation
+        ↓
+Caption style selected
+        ↓
+Style-specific prompt created
+        ↓
+Image + prompt sent to Hugging Face
+        ↓
+Vision AI analyzes the image
+        ↓
+Generated caption returned
+        ↓
+Caption displayed in the UI
