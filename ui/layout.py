@@ -26,7 +26,7 @@ def create_ui(caption_service, device):
             """
         )
 
-        with gr.Row(elem_classes="main-row"):
+        with gr.Row(elem_classes="info-row"):
             with gr.Column(scale=1, elem_classes="card"):
                 gr.Markdown("### 🖼️ Image Input")
 
