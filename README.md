@@ -25,6 +25,26 @@ An AI-powered image captioning web application that analyzes uploaded images and
 
 ---
 
+## 📸 Screenshots
+
+### Main Interface
+
+![AI Image Captioner](docs/images/main-interface.png)
+
+### Short Caption
+
+![Short Caption](docs/images/short-caption.png)
+
+### Detailed Caption
+
+![Detailed Caption](docs/images/detailed-caption.png)
+
+### Creative Caption
+
+![Creative Caption](docs/images/creative-caption.png)
+
+---
+
 ## 🧠 AI Model
 
 The application currently uses:
