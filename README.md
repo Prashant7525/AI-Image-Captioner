@@ -75,3 +75,19 @@ Vision AI analyzes the image
 Generated caption returned
         ↓
 Caption displayed in the UI
+
+
+## 📁 Project Structure
+
+AI-Image-Captioner/
+├── core/              # Core application logic
+├── docs/images/       # README screenshots
+├── services/          # AI/API services
+├── styles/            # Styling files
+├── tests/             # Test files
+├── ui/                # User interface components
+├── app.py             # Main application
+├── config.py          # Configuration
+├── logger.py          # Logging
+├── requirements.txt   # Python dependencies
+└── .env.example       # Environment variable template
