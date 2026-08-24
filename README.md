@@ -210,3 +210,11 @@ GitHub: [Prashant7525](https://github.com/Prashant7525)
 ------------------------------------------------------------------------
 
 ⭐ If you find this project useful, consider giving it a star!
+
+------------------------------------------------------------------------
+
+## 🤝 Contributing
+
+Contributions and improvements are welcome.
+
+If you have an idea for improving the image captioning experience, documentation, accessibility, testing, or AI integration, feel free to open an issue or submit a pull request.
